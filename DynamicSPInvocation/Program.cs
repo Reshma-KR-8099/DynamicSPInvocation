@@ -4,6 +4,7 @@ using DynamicSPInvocation.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using Serilog.Debugging;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,24 +31,30 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-configuration["Serilog:WriteTo:0:Args:serilogconnectionString"] = configuration["Serilog:WriteTo:0:Args:serilogconnectionString"];
+
+SelfLog.Enable(msg =>
+{
+    Console.WriteLine(msg); // Log errors to the console
+    System.IO.File.AppendAllText("serilog-errors.txt", msg + Environment.NewLine); // Also log errors to a file
+});
+configuration["Serilog:WriteTo:0:Args:connectionString"] = configuration["Serilog:WriteTo:0:Args:connectionString"];
 
 Log.Logger = new LoggerConfiguration()
  .ReadFrom.Configuration(configuration).Enrich.FromLogContext()
-.CreateLogger();
+    .CreateLogger();
 
 
 
 
-Serilog.Debugging.SelfLog.Enable(msg => Console.WriteLine(msg));
+
 builder.Host.UseSerilog(((ctx, lc) => {
-    var str = ctx.Configuration["Serilog:WriteTo:0:Args:serilogconnectionString"];
-    ctx.Configuration["Serilog:WriteTo:0:Args:serilogconnectionString"] = str;
+    var str = ctx.Configuration["Serilog:WriteTo:0:Args:connectionString"];
+    ctx.Configuration["Serilog:WriteTo:0:Args:connectionString"] = str;
     lc.ReadFrom.Configuration(ctx.Configuration);
 }));
 
 
-builder.Host.UseSerilog();
+//builder.Host.UseSerilog();
 // Add services to the container.
 builder.Services.AddTransient<IHandlingMultipleSP, DynamicSPService>();
 builder.Services.AddControllers();

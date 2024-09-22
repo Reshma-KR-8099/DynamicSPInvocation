@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
+using Serilog.Context;
 using System.Data;
 using System.Data.SqlClient;
 using System.Net;
@@ -31,6 +32,10 @@ namespace DynamicSPInvocation.Controllers
         [Route("ExecuteMultipleSP")]
         public async Task<APIResponse<Dictionary<string, object>>> ExecuteSP(SPRequest request)
         {
+            LogContext.PushProperty("API", "ExecuteMultipleSP");
+            LogContext.PushProperty("Method", "ExecuteSP");
+            var CorrID = Guid.NewGuid().ToString();
+            LogContext.PushProperty("CorrelationID", CorrID);
             try
             {
                 if (request.procedureNames == null || request.procedureNames.Count <= 0)
@@ -49,6 +54,7 @@ namespace DynamicSPInvocation.Controllers
 
                 if (result.Data != null && result.Data?.Count > 0)
                 {
+                    result.correlationID = CorrID;
                     _logger.LogInformation("Successfully completed the SP operation", "DynamicController");
                     return result;
                 }
@@ -59,7 +65,8 @@ namespace DynamicSPInvocation.Controllers
                     return new APIResponse<Dictionary<string, object>>
                     {
                         statusCode = HttpStatusCode.BadRequest,
-                        statusMessage = result.statusMessage
+                        statusMessage = result.statusMessage,
+                        correlationID=CorrID
                     };
                 }
 
@@ -72,6 +79,7 @@ namespace DynamicSPInvocation.Controllers
                 {
                     statusCode = HttpStatusCode.InternalServerError,
                     statusMessage = ex.Message,
+                    correlationID = CorrID
                 };
             }
 

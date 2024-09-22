@@ -1,0 +1,12 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/DynamicSPInvocation/WeatherForecast.cs
+/DynamicSPInvocation/DynamicSPInvocation.http
+/DynamicSPInvocation/appsettings.Development.json
+/DynamicSPInvocation/DynamicSPInvocation.csproj.user
+/DynamicSPInvocation/obj
+/.vs
+/DynamicSPInvocation
+/DynamicSPInvocation.sln

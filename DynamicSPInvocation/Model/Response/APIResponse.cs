@@ -11,5 +11,6 @@ namespace DynamicSPInvocation.Model.Response
 
         //[System.Text.Json.Serialization.JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string statusMessage { get; set; }
+        public string correlationID { get; set; }
     }
 }
